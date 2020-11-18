@@ -14,8 +14,40 @@ variables:
 
 steps:
 - task: DotNetCoreCLI@2
+  displayName: 'Restore NuGet packages'
+  inputs:
+    command: 'restore'
+    projects: '**/*.csproj'
+    feedsToUse: 'select'
+
+- task: Npm@1
+  displayName: 'install npm dependencies'
+  inputs:
+    command: 'install'
+
+- task: CmdLine@2
+  displayName: 'Compile SASS file to CSS'
+  inputs:
+    script: './node_modules/.bin/node-sass Tailspin.SpaceGame.Web/wwwroot --output Tailspin.SpaceGame.Web/wwwroot'
+
+- task: gulp@0
+  displayName: 'Minify JS'
+
+- task: DotNetCoreCLI@2
   displayName: 'Build .NET Core project'
   inputs:
     command: 'build'
     arguments: --configuration $(buildConfiguration)
     projects: '**/*.csproj'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    arguments: --configuration $(buildConfiguration)
+    publishWebProjects: false
+    zipAfterPublish: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
