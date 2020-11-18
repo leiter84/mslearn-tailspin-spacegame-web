@@ -17,4 +17,5 @@ steps:
   displayName: 'Build .NET Core project'
   inputs:
     command: 'build'
+    arguments: --configuration $(buildConfiguration)
     projects: '**/*.csproj'
